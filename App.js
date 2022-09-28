@@ -3,7 +3,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react-native/no-inline-styles */
 
-import Icon from 'react-native-vector-icons/FontAwesome';
+// import Icon from 'react-native-vector-icons/FontAwesome';
 import React, {useState, useEffect} from 'react';
 import {Node} from 'react';
 import {HelloWorld} from './components/HelloWorld';
@@ -16,6 +16,8 @@ import {TailwindProvider} from 'tailwind-rn';
 import utilities from './tailwind.json';
 import {TabView, Tab} from '@rneui/themed';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {Icon} from '@rneui/themed';
+import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 
 // import {Tree} from './components/Tree';
 let firstWeek = '2022-08-29';
@@ -27,22 +29,103 @@ let week = 4;
 let weekNum = 18;
 let tken;
 let itemHeight = 90;
-import {Text, View, Button, Alert, StyleSheet} from 'react-native';
+import {
+  Text,
+  View,
+  Button,
+  Alert,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+  SafeAreaView,
+  Dimensions,
+} from 'react-native';
 
-// import {
-//   Colors,
-//   DebugInstructions,
-//   Header,
-//   LearnMoreLinks,
-//   ReloadInstructions,
-// } from 'react-native/Libraries/NewAppScreen';
+const ScreenHeight = Dimensions.get('window').height;
+const ScreenWidth = Dimensions.get('window').width;
+let table_1 = [];
+const ThisWeek = 5;
 
 // 创建主函数
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.QueryTable(13, 4, 10);
-    this.state = {table: [], week: 1, index: 0};
+    this.QueryTable(ThisWeek, 1, 1);
+    this.QueryTable(ThisWeek, 1, 3);
+    this.QueryTable(ThisWeek, 1, 6);
+    this.QueryTable(ThisWeek, 1, 8);
+    this.QueryTable(ThisWeek, 1, 10);
+    this.QueryTable(ThisWeek, 2, 1);
+    this.QueryTable(ThisWeek, 2, 3);
+    this.QueryTable(ThisWeek, 2, 6);
+    this.QueryTable(ThisWeek, 2, 8);
+    this.QueryTable(ThisWeek, 2, 10);
+    this.QueryTable(ThisWeek, 3, 1);
+    this.QueryTable(ThisWeek, 3, 3);
+    this.QueryTable(ThisWeek, 3, 6);
+    this.QueryTable(ThisWeek, 3, 8);
+    this.QueryTable(ThisWeek, 3, 10);
+    this.QueryTable(ThisWeek, 4, 1);
+    this.QueryTable(ThisWeek, 4, 3);
+    this.QueryTable(ThisWeek, 4, 6);
+    this.QueryTable(ThisWeek, 4, 8);
+    this.QueryTable(ThisWeek, 4, 10);
+    this.QueryTable(ThisWeek, 5, 1);
+    this.QueryTable(ThisWeek, 5, 3);
+    this.QueryTable(ThisWeek, 5, 6);
+    this.QueryTable(ThisWeek, 5, 8);
+    this.QueryTable(ThisWeek, 5, 10);
+    this.QueryTable(ThisWeek, 6, 1);
+    this.QueryTable(ThisWeek, 6, 3);
+    this.QueryTable(ThisWeek, 6, 6);
+    this.QueryTable(ThisWeek, 6, 8);
+    this.QueryTable(ThisWeek, 6, 10);
+    this.QueryTable(ThisWeek, 7, 1);
+    this.QueryTable(ThisWeek, 7, 3);
+    this.QueryTable(ThisWeek, 7, 6);
+    this.QueryTable(ThisWeek, 7, 8);
+    this.QueryTable(ThisWeek, 7, 10);
+
+    this.state = {
+      table1_1: [],
+      table1_3: [],
+      table1_6: [],
+      table1_8: [],
+      table1_10: [],
+      table2_1: [],
+      table2_3: [],
+      table2_6: [],
+      table2_8: [],
+      table2_10: [],
+      table3_1: [],
+      table3_3: [],
+      table3_6: [],
+      table3_8: [],
+      table3_10: [],
+      table4_1: [],
+      table4_3: [],
+      table4_6: [],
+      table4_8: [],
+      table4_10: [],
+      table5_1: [],
+      table5_3: [],
+      table5_6: [],
+      table5_8: [],
+      table5_10: [],
+      table6_1: [],
+      table6_3: [],
+      table6_6: [],
+      table6_8: [],
+      table6_10: [],
+      table7_1: [],
+      table7_3: [],
+      table7_6: [],
+      table7_8: [],
+      table7_10: [],
+      week: 1,
+      index: 0,
+      windowSize: 0,
+    };
   }
   /**
    * 查询课表
@@ -67,93 +150,407 @@ class App extends React.Component {
       ks_2 = parseInt(ks_2);
       ks_3 = parseInt(ks_3);
       if (wd === wa && (ks === cn || ks_2 === cn)) {
-        console.log('找到课程');
-        console.log(n);
+        // console.log('找到课程');
+        // console.log(n);
         flag = true;
 
-        classInfo[1] = n.kcmc;
-        classInfo[2] = n.jsmc;
-        classInfo[3] = n.kssj + '-' + n.jssj;
-        classInfo[4] = n.jsxm;
-        classInfo[5] = ks_2;
-        this.setState({
-          table: classInfo,
-          week: 2,
-        });
+        classInfo[1] = n.kcmc; //课程名称
+        classInfo[2] = n.jsmc; //教师名称
+        classInfo[3] = n.kssj + '-' + n.jssj; //上课时间
+        classInfo[4] = n.jsxm; //教室名称
+        classInfo[5] = ks_2; //课程结束节数，第五节
+        classInfo[6] = ks_3; //课程结束节数2，第四节
+        tableName = 'table' + wa + '_' + ks;
+        if (wa === 1 && cn === 1) {
+          this.setState({
+            table1_1: classInfo,
+          });
+        }
+        if (wa === 1 && cn === 3) {
+          this.setState({
+            table1_3: classInfo,
+          });
+        }
+        if (wa === 1 && cn === 6) {
+          this.setState({
+            table1_6: classInfo,
+          });
+        }
+        if (wa === 1 && cn === 8) {
+          this.setState({
+            table1_8: classInfo,
+          });
+        }
+        if (wa === 1 && cn === 10) {
+          this.setState({
+            table1_10: classInfo,
+          });
+        }
+        if (wa === 2 && cn === 1) {
+          this.setState({
+            table2_1: classInfo,
+          });
+        }
+        if (wa === 2 && cn === 3) {
+          this.setState({
+            table2_3: classInfo,
+          });
+        }
+        if (wa === 2 && cn === 6) {
+          this.setState({
+            table2_6: classInfo,
+          });
+        }
+        if (wa === 2 && cn === 8) {
+          this.setState({
+            table2_8: classInfo,
+          });
+        }
+        if (wa === 2 && cn === 10) {
+          this.setState({
+            table2_10: classInfo,
+          });
+        }
+        if (wa === 3 && cn === 1) {
+          this.setState({
+            table3_1: classInfo,
+          });
+        }
+        if (wa === 3 && cn === 3) {
+          this.setState({
+            table3_3: classInfo,
+          });
+        }
+        if (wa === 3 && cn === 6) {
+          this.setState({
+            table3_6: classInfo,
+          });
+        }
+        if (wa === 3 && cn === 8) {
+          this.setState({
+            table3_8: classInfo,
+          });
+        }
+        if (wa === 3 && cn === 10) {
+          this.setState({
+            table3_10: classInfo,
+          });
+        }
+        if (wa === 4 && cn === 1) {
+          this.setState({
+            table4_1: classInfo,
+          });
+        }
+        if (wa === 4 && cn === 3) {
+          this.setState({
+            table4_3: classInfo,
+          });
+        }
+        if (wa === 4 && cn === 6) {
+          this.setState({
+            table4_6: classInfo,
+          });
+        }
+        if (wa === 4 && cn === 8) {
+          this.setState({
+            table4_8: classInfo,
+          });
+        }
+        if (wa === 4 && cn === 10) {
+          this.setState({
+            table4_10: classInfo,
+          });
+        }
+        if (wa === 5 && cn === 1) {
+          this.setState({
+            table5_1: classInfo,
+          });
+        }
+        if (wa === 5 && cn === 3) {
+          this.setState({
+            table5_3: classInfo,
+          });
+        }
+        if (wa === 5 && cn === 6) {
+          this.setState({
+            table5_6: classInfo,
+          });
+        }
+        if (wa === 5 && cn === 8) {
+          this.setState({
+            table5_8: classInfo,
+          });
+        }
+        if (wa === 5 && cn === 10) {
+          this.setState({
+            table5_10: classInfo,
+          });
+        }
+        if (wa === 6 && cn === 1) {
+          this.setState({
+            table6_1: classInfo,
+          });
+        }
+        if (wa === 6 && cn === 3) {
+          this.setState({
+            table6_3: classInfo,
+          });
+        }
+        if (wa === 6 && cn === 6) {
+          this.setState({
+            table6_6: classInfo,
+          });
+        }
+        if (wa === 6 && cn === 8) {
+          this.setState({
+            table6_8: classInfo,
+          });
+        }
+        if (wa === 6 && cn === 10) {
+          this.setState({
+            table6_10: classInfo,
+          });
+        }
+        if (wa === 7 && cn === 1) {
+          this.setState({
+            table7_1: classInfo,
+          });
+        }
+        if (wa === 7 && cn === 3) {
+          this.setState({
+            table7_3: classInfo,
+          });
+        }
+        if (wa === 7 && cn === 6) {
+          this.setState({
+            table7_6: classInfo,
+          });
+        }
+        if (wa === 7 && cn === 8) {
+          this.setState({
+            table7_8: classInfo,
+          });
+        }
+        if (wa === 7 && cn === 10) {
+          this.setState({
+            table7_10: classInfo,
+          });
+        }
+
+        table_1 = classInfo;
         return classInfo;
       }
     });
     if (flag === false) {
-      console.log('无课');
+      // console.log('无课');
+      tableName = 'table' + wa + '_' + cn;
       this.setState({
         table: classInfo,
       });
       return classInfo;
     }
   };
+
   render() {
+    const Tab = createMaterialTopTabNavigator();
+    const numbers = [1, 2, 3, 4];
+    const DATA = [
+      {
+        id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
+        title: 'First Item',
+      },
+      {
+        id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
+        title: 'Second Item',
+      },
+      {
+        id: '58694a0f-3da1-471f-bd96-145571e29d72',
+        title: 'Third Item',
+      },
+    ];
+    const Item = ({title}) => {
+      return (
+        <View style={styles.item}>
+          <Text style={styles.title}>{title}</Text>
+        </View>
+      );
+    };
+    const CS = [
+      {id: 1},
+      {id: 2},
+      {id: 3},
+      {id: 4},
+      {id: 5},
+      {id: 6},
+      {id: 7},
+      {id: 8},
+      {id: 9},
+      {id: 10},
+      {id: 11},
+      {id: 12},
+      {id: 13},
+    ];
+    const lineheight = Dimensions.get('window').height * 0.057;
+    // 左侧课程序号组件
+    const Pitem = ({item}) => {
+      return (
+        <View>
+          <Text style={{lineHeight: lineheight, marginLeft: 2}}>{item.id}</Text>
+        </View>
+      );
+    };
+    // 课表顶部周几日组件
+    const Witem = ({name, day}) => {
+      return (
+        <View
+          style={{
+            width: 45,
+            height: 30,
+            margin: 1,
+            backgroundColor: 'white',
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: '#f5f5f5',
+          }}>
+          <Text style={{color: 'black', fontSize: 10}}>{name}</Text>
+          <Text style={{color: 'black', fontSize: 10}}>{day}</Text>
+        </View>
+      );
+    };
+    // 主课表区域组件
+    const MainView = table => {
+      const ColWidth = '14.3%';
+      return (
+        <View
+          style={{
+            backgroundColor: '#eff6ff',
+            height: '100%',
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}>
+          <View
+            style={{
+              width: 30,
+              position: 'relative',
+              float: 'left',
+              // display: 'inline-block',
+            }}>
+            <Text style={{height: 30, marginTop: 5}}>9月</Text>
+            <FlatList
+              data={CS}
+              renderItem={Pitem}
+              keyExtractor={item => item.id}
+            />
+          </View>
+          <View
+            style={{
+              position: 'absolute',
+              marginLeft: 20,
+              // columnCount: 7,
+              flexDirection: 'row',
+            }}>
+            <View style={{float: 'left', width: ColWidth}}>
+              <Witem name="周一" day="9-28" />
+              <ClassTableItem classInfo={this.state.table1_1} />
+              <ClassTableItem classInfo={this.state.table1_3} />
+              <ClassTableItem classInfo={this.state.table1_6} />
+              <ClassTableItem classInfo={this.state.table1_8} />
+              <ClassTableItem classInfo={this.state.table1_10} />
+            </View>
+            <View style={{float: 'left', width: ColWidth}}>
+              <Witem name="周一" day="9-28" />
+              <ClassTableItem classInfo={this.state.table2_1} />
+              <ClassTableItem classInfo={this.state.table2_3} />
+              <ClassTableItem classInfo={this.state.table2_6} />
+              <ClassTableItem classInfo={this.state.table2_8} />
+              <ClassTableItem classInfo={this.state.table2_10} />
+            </View>
+            <View style={{float: 'left', width: ColWidth}}>
+              <Witem name="周一" day="9-28" />
+              <FlatView />
+            </View>
+            <View style={{float: 'left', width: ColWidth}}>
+              <Witem name="周一" day="9-28" />
+              <FlatView />
+            </View>
+            <View style={{float: 'left', width: ColWidth}}>
+              <Witem name="周一" day="9-28" />
+              <FlatView />
+            </View>
+            <View style={{float: 'left', width: ColWidth}}>
+              <Witem name="周一" day="9-28" />
+              <FlatView />
+            </View>
+            <View style={{float: 'left', width: ColWidth}}>
+              <Witem name="周一" day="9-28" />
+              <FlatView />
+            </View>
+          </View>
+        </View>
+      );
+    };
+    const renderItem = ({item}) => <Item title={item.title} />;
+    function FlatView() {
+      return (
+        <FlatList
+          data={DATA}
+          renderItem={renderItem}
+          keyExtractor={item => item.id}
+        />
+      );
+    }
     return (
       <TailwindProvider utilities={utilities}>
         <NavigationContainer>
-          {/* <TopBar /> */}
-          <Tab
-            value={this.state.index}
-            scrollable
-            containerStyle={{backgroundColor: '#4099FF'}}
-            onChange={e =>
-              this.setState({
-                index: e,
-              })
-            }
-            disableIndicator>
-            {/* <Icon name={'angle-right'} size={30} color="#900" /> */}
-            <Tab.Item
-              containerStyle={active => ({
-                backgroundColor: active ? '#bfdbfe' : undefined,
+          <Tab.Navigator
+            screenOptions={{
+              tabBarScrollEnabled: true,
+              tabBarItemStyle: {
                 width: 70,
                 height: 50,
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                borderRadius: 5,
-                margin: 3,
-                color: '#3b82f6',
-                paddingHorizontal: 0,
-                paddingBottom: 0,
-              })}
-              titleStyle={{
-                color: '#3b82f6',
-                zIndex: 100,
-                fontWeight: 'bold',
-                fontSize: 12,
-                margin: 0,
-              }}>
-              @1
-            </Tab.Item>
-          </Tab>
-          <TabView
-            value={this.state.index}
-            onChange={e =>
-              this.setState({
-                index: e,
-              })
-            }
-            animationType="spring">
-            <TabView.Item style={[styles.viewModel]}>
-              <ClassTableItem classInfo={this.state.table} />
-            </TabView.Item>
-            <TabView.Item style={{backgroundColor: '#eff6ff', width: '100%'}}>
-              <Text h1>Recent</Text>
-            </TabView.Item>
-          </TabView>
-
-          {/* <Button title="Press me" onPress={() => this.QueryTable(4, 2, 3)} /> */}
+                backgroundColor: '#4099FF',
+              },
+              tabBarStyle: {
+                backgroundColor: 'powderblue',
+                marginBottom: 5,
+              },
+              tabBarActiveTintColor: 'white',
+              tabBarIndicatorStyle: {
+                backgroundColor: 'white',
+                height: 3,
+                width: 90,
+              },
+            }}>
+            <Tab.Screen name="第1周" component={MainView} />
+            <Tab.Screen name="第2周" component={FlatView} />
+            <Tab.Screen name="第3周" component={FlatView} />
+            <Tab.Screen name="第4周" component={FlatView} />
+            <Tab.Screen name="第5周" component={FlatView} />
+            <Tab.Screen name="第6周" component={FlatView} />
+          </Tab.Navigator>
+          <PreviewLayout values={['更新', '设置', '课表']}></PreviewLayout>
         </NavigationContainer>
       </TailwindProvider>
     );
   }
 }
 
+const PreviewLayout = ({children, values}) => (
+  <View style={{padding: 10, height: 50, backgroundColor: '#4099FF'}}>
+    <View style={styles.row}>
+      <TouchableOpacity style={[styles.button]}>
+        <Icon name="calendar" type="evilicon" color="white" />
+      </TouchableOpacity>
+      <TouchableOpacity style={[styles.button]}>
+        <Icon name="arrow-down" type="evilicon" color="white" />
+      </TouchableOpacity>
+      <TouchableOpacity style={[styles.button]}>
+        <Icon name="gear" type="evilicon" color="white" />
+      </TouchableOpacity>
+    </View>
+    <View style={[styles.container]}>{children}</View>
+  </View>
+);
 // 逻辑函数
 
 // 创建函数返回当前日期（年月日）
@@ -196,7 +593,7 @@ function Crawl() {
   let rep;
 
   Http.onreadystatechange = function () {
-    console.log(this.responseText);
+    // console.log(this.responseText);
     rep = this.responseText;
     let res = JSON.parse(rep);
     tken = res.token;
@@ -216,7 +613,7 @@ function Crawl() {
       HttpRequest[i].setRequestHeader('token', tken);
       HttpRequest[i].send();
       HttpRequest[i].onreadystatechange = function () {
-        console.log('第' + zsc + '周' + this.responseText);
+        // console.log('第' + zsc + '周' + this.responseText);
         jsonValue = this.responseText;
         let id_d = '@' + zsc;
         storeData(id_d, jsonValue);
@@ -228,7 +625,7 @@ function Crawl() {
 // 存储数据到缓存
 const storeData = async (id_data, value) => {
   try {
-    console.log('存储数据');
+    // console.log('存储数据');
     jsonValue = JSON.stringify(value);
     await AsyncStorage.setItem(id_data, jsonValue);
   } catch (e) {
@@ -239,9 +636,7 @@ const storeData = async (id_data, value) => {
 // 获取缓存中的数据
 const getData = async w => {
   try {
-    // w = w;
-    // let id_d = '@' + w;
-    console.log('读取数据');
+    // console.log('读取数据');
     jsonValue = await AsyncStorage.getItem(w).catch(e => {
       console.log('读取失败' + e);
     });
@@ -257,9 +652,9 @@ const getData = async w => {
 
 function ClassTableItem(props) {
   const tailwind = useTailwind();
-  console.log(props.classInfo[5]);
-  if (props.data === null) {
-    return <View></View>;
+  // console.log('!@#' + props.classInfo[1]);
+  if (props.data === null || props.classInfo[1] === undefined) {
+    return <View style={[styles.item_enpty]}></View>;
   } else {
     if (props.classInfo[5] === 5 || props.classInfo[5] === 12) {
       return (
@@ -268,21 +663,28 @@ function ClassTableItem(props) {
             {props.classInfo[1]}
           </Text>
           <Text style={[styles.item_child]}>#{props.classInfo[2]}</Text>
-          {/* <Text>{props.classInfo[3]}</Text> */}
-          {/* <Text>{props.classInfo[4]}</Text> */}
         </View>
       );
     } else {
-      return (
-        <View style={[styles.item]}>
-          <Text numberOfLines={5} style={[styles.item_child]}>
-            {props.classInfo[1]}
-          </Text>
-          <Text style={[styles.item_child]}>#{props.classInfo[2]}</Text>
-          {/* <Text>{props.classInfo[3]}</Text> */}
-          {/* <Text>{props.classInfo[4]}</Text> */}
-        </View>
-      );
+      if (props.classInfo[6] === 4) {
+        return (
+          <View style={[styles.item_2]}>
+            <Text numberOfLines={5} style={[styles.item_child]}>
+              {props.classInfo[1]}
+            </Text>
+            <Text style={[styles.item_child]}>#{props.classInfo[2]}</Text>
+          </View>
+        );
+      } else {
+        return (
+          <View style={[styles.item]}>
+            <Text numberOfLines={5} style={[styles.item_child]}>
+              {props.classInfo[1]}
+            </Text>
+            <Text style={[styles.item_child]}>#{props.classInfo[2]}</Text>
+          </View>
+        );
+      }
     }
   }
 }
@@ -300,19 +702,20 @@ const styles = StyleSheet.create({
     color: 'red',
   },
   item: {
-    width: 55,
-    height: 90,
+    width: ScreenWidth / 7.8,
+    height: ScreenHeight * 0.11,
     padding: 5,
-    borderRadius: 16,
+    borderRadius: 11,
     backgroundColor: '#2A82E4',
     borderColor: '#5DA4F5',
     borderWidth: 3,
     display: 'flex',
     justifyContent: 'center',
+    margin: 1.5,
   },
   item_1: {
-    width: 55,
-    height: 150,
+    width: ScreenWidth / 7.8,
+    height: ScreenHeight * 0.17,
     padding: 5,
     borderRadius: 16,
     backgroundColor: '#2A82E4',
@@ -320,10 +723,31 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     display: 'flex',
     justifyContent: 'center',
+    margin: 1.5,
+    marginBottom: 7,
+  },
+  item_2: {
+    width: ScreenWidth / 7.8,
+    height: ScreenHeight * 0.11,
+    padding: 5,
+    borderRadius: 11,
+    backgroundColor: '#2A82E4',
+    borderColor: '#5DA4F5',
+    borderWidth: 3,
+    display: 'flex',
+    justifyContent: 'center',
+    margin: 1.5,
+    marginBottom: (ScreenHeight * 0.11) / 1.6,
+  },
+  item_enpty: {
+    width: ScreenWidth / 7.8,
+    height: ScreenHeight * 0.11,
+    padding: 5,
+    margin: 1.5,
   },
   item_child: {
     color: 'white',
-    fontSize: 12,
+    fontSize: 10,
     maxHeight: 48,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
@@ -333,6 +757,73 @@ const styles = StyleSheet.create({
     backgroundColor: '#eff6ff',
     width: '100%',
     padding: 3,
+  },
+  tabNav: {
+    // 让子元素并排显示
+    display: 'flex',
+    flexDirection: 'row',
+    width: '100%',
+  },
+  tabButton: {
+    // 占屏幕宽度一半
+    width: '50%',
+  },
+  row: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 100,
+  },
+  button: {
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 4,
+    backgroundColor: '#2A82E4',
+    alignSelf: 'center',
+    marginHorizontal: '1%',
+    marginBottom: 1,
+    minWidth: '30%',
+    textAlign: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: 'white',
+  },
+  selected: {
+    backgroundColor: 'coral',
+    borderWidth: 0,
+  },
+  buttonLabel: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: 'white',
+  },
+  selectedLabel: {
+    color: 'white',
+  },
+  label: {
+    textAlign: 'center',
+    marginBottom: 10,
+    fontSize: 24,
+  },
+  sidebar: {
+    position: 'fixed',
+    display: 'inlinBlock',
+    width: '50',
+    height: '100',
+    left: 0,
+    float: 'left',
+    backgroundColor: '#000000',
+  },
+  line: {
+    position: 'relative',
+    display: 'inlineBlock',
+    width: 750,
+    height: 153,
+    left: 26,
+    float: 'left',
+    color: '#2A82B2',
+    borderTop: '1px solid rgb(214, 211, 211)',
   },
 });
 
