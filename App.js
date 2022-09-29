@@ -5,16 +5,16 @@
 
 // import Icon from 'react-native-vector-icons/FontAwesome';
 import React, {useState, useEffect} from 'react';
-import {Node} from 'react';
-import {HelloWorld} from './components/HelloWorld';
+// import {Node} from 'react';
+// import {HelloWorld} from './components/HelloWorld';
 import {NavigationContainer} from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+// import {createNativeStackNavigator} from '@react-navigation/native-stack';
 // import {ClassTableItem} from './components/ClassTableItem';
 const moment = require('moment');
 import {useTailwind} from 'tailwind-rn';
 import {TailwindProvider} from 'tailwind-rn';
 import utilities from './tailwind.json';
-import {TabView, Tab} from '@rneui/themed';
+// import {TabView, Tab} from '@rneui/themed';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Icon} from '@rneui/themed';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
@@ -44,48 +44,13 @@ import {
 const ScreenHeight = Dimensions.get('window').height;
 const ScreenWidth = Dimensions.get('window').width;
 let table_1 = [];
-const ThisWeek = 5;
-
+let ThisWeek = 1;
+let tableJson = [];
 // 创建主函数
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.QueryTable(ThisWeek, 1, 1);
-    this.QueryTable(ThisWeek, 1, 3);
-    this.QueryTable(ThisWeek, 1, 6);
-    this.QueryTable(ThisWeek, 1, 8);
-    this.QueryTable(ThisWeek, 1, 10);
-    this.QueryTable(ThisWeek, 2, 1);
-    this.QueryTable(ThisWeek, 2, 3);
-    this.QueryTable(ThisWeek, 2, 6);
-    this.QueryTable(ThisWeek, 2, 8);
-    this.QueryTable(ThisWeek, 2, 10);
-    this.QueryTable(ThisWeek, 3, 1);
-    this.QueryTable(ThisWeek, 3, 3);
-    this.QueryTable(ThisWeek, 3, 6);
-    this.QueryTable(ThisWeek, 3, 8);
-    this.QueryTable(ThisWeek, 3, 10);
-    this.QueryTable(ThisWeek, 4, 1);
-    this.QueryTable(ThisWeek, 4, 3);
-    this.QueryTable(ThisWeek, 4, 6);
-    this.QueryTable(ThisWeek, 4, 8);
-    this.QueryTable(ThisWeek, 4, 10);
-    this.QueryTable(ThisWeek, 5, 1);
-    this.QueryTable(ThisWeek, 5, 3);
-    this.QueryTable(ThisWeek, 5, 6);
-    this.QueryTable(ThisWeek, 5, 8);
-    this.QueryTable(ThisWeek, 5, 10);
-    this.QueryTable(ThisWeek, 6, 1);
-    this.QueryTable(ThisWeek, 6, 3);
-    this.QueryTable(ThisWeek, 6, 6);
-    this.QueryTable(ThisWeek, 6, 8);
-    this.QueryTable(ThisWeek, 6, 10);
-    this.QueryTable(ThisWeek, 7, 1);
-    this.QueryTable(ThisWeek, 7, 3);
-    this.QueryTable(ThisWeek, 7, 6);
-    this.QueryTable(ThisWeek, 7, 8);
-    this.QueryTable(ThisWeek, 7, 10);
-
+    // this.QueryTableClass(ThisWeek);
     this.state = {
       table1_1: [],
       table1_3: [],
@@ -122,22 +87,91 @@ class App extends React.Component {
       table7_6: [],
       table7_8: [],
       table7_10: [],
+
       week: 1,
       index: 0,
       windowSize: 0,
     };
   }
+  // async componentWillMount() {
+  //   console.log('执行了componentWillMount');
+  //   for (let u = 1; u < weekNum; u++) {
+  //     let id_d = '@' + u;
+  //     let json = await getData(id_d);
+  //     json = JSON.parse(json);
+  //     tableJson[u] = json;
+  //     console.log('执行了componentWillMount' + u);
+  //     console.log(tableJson[u]);
+  //   }
+  // }
+  UpdateAll = async () => {
+    console.log('执行了UpdateAll');
+    for (let i = 1; i < weekNum + 1; i++) {
+      await this.GetTableCache(i);
+    }
+    this.QueryTable(ThisWeek, 1, 1);
+    this.QueryTable(ThisWeek, 1, 3);
+    this.QueryTable(ThisWeek, 1, 6);
+    this.QueryTable(ThisWeek, 1, 8);
+    this.QueryTable(ThisWeek, 1, 10);
+    this.QueryTable(ThisWeek, 2, 1);
+    this.QueryTable(ThisWeek, 2, 3);
+    this.QueryTable(ThisWeek, 2, 6);
+    this.QueryTable(ThisWeek, 2, 8);
+    this.QueryTable(ThisWeek, 2, 10);
+    this.QueryTable(ThisWeek, 3, 1);
+    this.QueryTable(ThisWeek, 3, 3);
+    this.QueryTable(ThisWeek, 3, 6);
+    this.QueryTable(ThisWeek, 3, 8);
+    this.QueryTable(ThisWeek, 3, 10);
+    this.QueryTable(ThisWeek, 4, 1);
+    this.QueryTable(ThisWeek, 4, 3);
+    this.QueryTable(ThisWeek, 4, 6);
+    this.QueryTable(ThisWeek, 4, 8);
+    this.QueryTable(ThisWeek, 4, 10);
+    this.QueryTable(ThisWeek, 5, 1);
+    this.QueryTable(ThisWeek, 5, 3);
+    this.QueryTable(ThisWeek, 5, 6);
+    this.QueryTable(ThisWeek, 5, 8);
+    this.QueryTable(ThisWeek, 5, 10);
+    this.QueryTable(ThisWeek, 6, 1);
+    this.QueryTable(ThisWeek, 6, 3);
+    this.QueryTable(ThisWeek, 6, 6);
+    this.QueryTable(ThisWeek, 6, 8);
+    this.QueryTable(ThisWeek, 6, 10);
+    this.QueryTable(ThisWeek, 7, 1);
+    this.QueryTable(ThisWeek, 7, 3);
+    this.QueryTable(ThisWeek, 7, 6);
+    this.QueryTable(ThisWeek, 7, 8);
+    this.QueryTable(ThisWeek, 7, 10);
+    this.forceUpdate();
+  };
+
+  GetTableCache = async id => {
+    console.log('执行了GetTableCache' + tableJson[id]);
+    let id_d = '@' + id;
+    let json = await getData(id_d);
+    json = JSON.parse(json);
+    tableJson[id] = json;
+  };
+
   /**
    * 查询课表
    * @param {int} 待查询的周数
    * @param {int} 待查询的星期几（天）
    * @param {int} 带查询的第几节课
    */
+
   QueryTable = async (wk, wa, cn) => {
+    console.log('执行了QueryTable');
+    // console.log('UpdateTable' + wk + wa + cn);
     let flag = false;
     let id_d = '@' + wk;
-    let json = await getData(id_d);
-    json = JSON.parse(json);
+    // let json = await this.GetTableCache(wk);
+    // 调用全局变量
+    json = tableJson[wk];
+    // json = JSON.parse(json);
+    // json = tableJson[wk];
     let classInfo = [];
     json.forEach(n => {
       let wd = n.kcsj[0];
@@ -146,9 +180,11 @@ class App extends React.Component {
       let ks = n.kcsj[1] + n.kcsj[2] + '';
       let ks_2 = n.kcsj[5] + n.kcsj[6] + '';
       let ks_3 = n.kcsj[3] + n.kcsj[4] + '';
+      let ks_4 = n.kcsj[7] + n.kcsj[8] + '';
       ks = parseInt(ks);
       ks_2 = parseInt(ks_2);
       ks_3 = parseInt(ks_3);
+      ks_4 = parseInt(ks_4);
       if (wd === wa && (ks === cn || ks_2 === cn)) {
         // console.log('找到课程');
         // console.log(n);
@@ -160,6 +196,8 @@ class App extends React.Component {
         classInfo[4] = n.jsxm; //教室名称
         classInfo[5] = ks_2; //课程结束节数，第五节
         classInfo[6] = ks_3; //课程结束节数2，第四节
+        classInfo[7] = ks_4; //课程结束节数3，连上时最后一节
+        classInfo[0] = cn; //查询时间判定
         tableName = 'table' + wa + '_' + ks;
         if (wa === 1 && cn === 1) {
           this.setState({
@@ -351,30 +389,18 @@ class App extends React.Component {
     }
   };
 
+  storeClassData = async (id_data, value) => {
+    try {
+      // console.log('存储数据');
+      jsonValue = JSON.stringify(value);
+      await AsyncStorage.setItem(id_data, jsonValue);
+    } catch (e) {
+      console.log('存储失败' + e);
+    }
+  };
+
   render() {
     const Tab = createMaterialTopTabNavigator();
-    const numbers = [1, 2, 3, 4];
-    const DATA = [
-      {
-        id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-        title: 'First Item',
-      },
-      {
-        id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-        title: 'Second Item',
-      },
-      {
-        id: '58694a0f-3da1-471f-bd96-145571e29d72',
-        title: 'Third Item',
-      },
-    ];
-    const Item = ({title}) => {
-      return (
-        <View style={styles.item}>
-          <Text style={styles.title}>{title}</Text>
-        </View>
-      );
-    };
     const CS = [
       {id: 1},
       {id: 2},
@@ -400,7 +426,10 @@ class App extends React.Component {
       );
     };
     // 课表顶部周几日组件
-    const Witem = ({name, day}) => {
+    const Witem = ({name, wk, nub}) => {
+      const foDate = moment(firstWeek)
+        .add(7 * (wk - 1) + nub - 1, 'days')
+        .format('MM-DD');
       return (
         <View
           style={{
@@ -413,13 +442,14 @@ class App extends React.Component {
             backgroundColor: '#f5f5f5',
           }}>
           <Text style={{color: 'black', fontSize: 10}}>{name}</Text>
-          <Text style={{color: 'black', fontSize: 10}}>{day}</Text>
+          <Text style={{color: 'black', fontSize: 10}}>{foDate}</Text>
         </View>
       );
     };
     // 主课表区域组件
     const MainView = table => {
       const ColWidth = '14.3%';
+
       return (
         <View
           style={{
@@ -450,55 +480,97 @@ class App extends React.Component {
               flexDirection: 'row',
             }}>
             <View style={{float: 'left', width: ColWidth}}>
-              <Witem name="周一" day="9-28" />
+              <Witem name="周一" wk={this.week} nub={1} />
               <ClassTableItem classInfo={this.state.table1_1} />
-              <ClassTableItem classInfo={this.state.table1_3} />
+              <ClassTableItem classInfo={this.state.table1_3} type={3} />
               <ClassTableItem classInfo={this.state.table1_6} />
               <ClassTableItem classInfo={this.state.table1_8} />
               <ClassTableItem classInfo={this.state.table1_10} />
             </View>
             <View style={{float: 'left', width: ColWidth}}>
-              <Witem name="周一" day="9-28" />
+              <Witem name="周二" wk={this.week} nub={2} />
               <ClassTableItem classInfo={this.state.table2_1} />
-              <ClassTableItem classInfo={this.state.table2_3} />
+              <ClassTableItem classInfo={this.state.table2_3} type={3} />
               <ClassTableItem classInfo={this.state.table2_6} />
               <ClassTableItem classInfo={this.state.table2_8} />
               <ClassTableItem classInfo={this.state.table2_10} />
             </View>
             <View style={{float: 'left', width: ColWidth}}>
-              <Witem name="周一" day="9-28" />
-              <FlatView />
+              <Witem name="周三" wk={this.week} nub={3} />
+              <ClassTableItem classInfo={this.state.table3_1} />
+              <ClassTableItem classInfo={this.state.table3_3} type={3} />
+              <ClassTableItem classInfo={this.state.table3_6} />
+              <ClassTableItem classInfo={this.state.table3_8} />
+              <ClassTableItem classInfo={this.state.table3_10} />
             </View>
             <View style={{float: 'left', width: ColWidth}}>
-              <Witem name="周一" day="9-28" />
-              <FlatView />
+              <Witem name="周四" wk={this.week} nub={4} />
+              <ClassTableItem classInfo={this.state.table4_1} />
+              <ClassTableItem classInfo={this.state.table4_3} type={3} />
+              <ClassTableItem classInfo={this.state.table4_6} />
+              <ClassTableItem classInfo={this.state.table4_8} />
+              <ClassTableItem classInfo={this.state.table4_10} />
             </View>
             <View style={{float: 'left', width: ColWidth}}>
-              <Witem name="周一" day="9-28" />
-              <FlatView />
+              <Witem name="周五" wk={this.week} nub={5} />
+              <ClassTableItem classInfo={this.state.table5_1} />
+              <ClassTableItem classInfo={this.state.table5_3} type={3} />
+              <ClassTableItem classInfo={this.state.table5_6} />
+              <ClassTableItem classInfo={this.state.table5_8} />
+              <ClassTableItem classInfo={this.state.table5_10} />
             </View>
             <View style={{float: 'left', width: ColWidth}}>
-              <Witem name="周一" day="9-28" />
-              <FlatView />
+              <Witem name="周六" wk={this.week} nub={6} />
+              <ClassTableItem classInfo={this.state.table6_1} />
+              <ClassTableItem classInfo={this.state.table6_3} type={3} />
+              <ClassTableItem classInfo={this.state.table6_6} />
+              <ClassTableItem classInfo={this.state.table6_8} />
+              <ClassTableItem classInfo={this.state.table6_10} />
             </View>
             <View style={{float: 'left', width: ColWidth}}>
-              <Witem name="周一" day="9-28" />
-              <FlatView />
+              <Witem name="周日" wk={this.week} nub={7} />
+              <ClassTableItem classInfo={this.state.table7_1} />
+              <ClassTableItem classInfo={this.state.table7_3} type={3} />
+              <ClassTableItem classInfo={this.state.table7_6} />
+              <ClassTableItem classInfo={this.state.table7_8} />
+              <ClassTableItem classInfo={this.state.table7_10} />
             </View>
           </View>
         </View>
       );
     };
-    const renderItem = ({item}) => <Item title={item.title} />;
-    function FlatView() {
-      return (
-        <FlatList
-          data={DATA}
-          renderItem={renderItem}
-          keyExtractor={item => item.id}
-        />
-      );
-    }
+
+    const arrA = [
+      {id: 1},
+      {id: 2},
+      {id: 3},
+      {id: 4},
+      {id: 5},
+      {id: 6},
+      {id: 7},
+      {id: 8},
+      {id: 9},
+      {id: 10},
+      {id: 11},
+      {id: 12},
+      {id: 13},
+    ];
+    const PreviewLayout = ({children, values}) => (
+      <View style={{padding: 10, height: 50, backgroundColor: '#4099FF'}}>
+        <View style={styles.row}>
+          <TouchableOpacity style={[styles.button]}>
+            <Icon name="calendar" type="evilicon" color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button]} onPress={this.UpdateAll}>
+            <Icon name="arrow-down" type="evilicon" color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button]}>
+            <Icon name="gear" type="evilicon" color="white" />
+          </TouchableOpacity>
+        </View>
+        <View style={[styles.container]}>{children}</View>
+      </View>
+    );
     return (
       <TailwindProvider utilities={utilities}>
         <NavigationContainer>
@@ -520,13 +592,101 @@ class App extends React.Component {
                 height: 3,
                 width: 90,
               },
+            }}
+            screenListeners={{
+              state: e => {
+                // Do something with the state
+                console.log('state changed', e.data.state.index);
+                ThisWeek = e.data.state.index + 1;
+                this.setState({
+                  week: e.data.state.index + 1,
+                  table1_1: [],
+                  table1_3: [],
+                  table1_6: [],
+                  table1_8: [],
+                  table1_10: [],
+                  table2_1: [],
+                  table2_3: [],
+                  table2_6: [],
+                  table2_8: [],
+                  table2_10: [],
+                  table3_1: [],
+                  table3_3: [],
+                  table3_6: [],
+                  table3_8: [],
+                  table3_10: [],
+                  table4_1: [],
+                  table4_3: [],
+                  table4_6: [],
+                  table4_8: [],
+                  table4_10: [],
+                  table5_1: [],
+                  table5_3: [],
+                  table5_6: [],
+                  table5_8: [],
+                  table5_10: [],
+                  table6_1: [],
+                  table6_3: [],
+                  table6_6: [],
+                  table6_8: [],
+                  table6_10: [],
+                  table7_1: [],
+                  table7_3: [],
+                  table7_6: [],
+                  table7_8: [],
+                  table7_10: [],
+                });
+
+                this.QueryTable(ThisWeek, 1, 1);
+                this.QueryTable(ThisWeek, 1, 3);
+                this.QueryTable(ThisWeek, 1, 6);
+                this.QueryTable(ThisWeek, 1, 8);
+                this.QueryTable(ThisWeek, 1, 10);
+                this.QueryTable(ThisWeek, 2, 1);
+                this.QueryTable(ThisWeek, 2, 3);
+                this.QueryTable(ThisWeek, 2, 6);
+                this.QueryTable(ThisWeek, 2, 8);
+                this.QueryTable(ThisWeek, 2, 10);
+                this.QueryTable(ThisWeek, 3, 1);
+                this.QueryTable(ThisWeek, 3, 3);
+                this.QueryTable(ThisWeek, 3, 6);
+                this.QueryTable(ThisWeek, 3, 8);
+                this.QueryTable(ThisWeek, 3, 10);
+                this.QueryTable(ThisWeek, 4, 1);
+                this.QueryTable(ThisWeek, 4, 3);
+                this.QueryTable(ThisWeek, 4, 6);
+                this.QueryTable(ThisWeek, 4, 8);
+                this.QueryTable(ThisWeek, 4, 10);
+                this.QueryTable(ThisWeek, 5, 1);
+                this.QueryTable(ThisWeek, 5, 3);
+                this.QueryTable(ThisWeek, 5, 6);
+                this.QueryTable(ThisWeek, 5, 8);
+                this.QueryTable(ThisWeek, 5, 10);
+                this.QueryTable(ThisWeek, 6, 1);
+                this.QueryTable(ThisWeek, 6, 3);
+                this.QueryTable(ThisWeek, 6, 6);
+                this.QueryTable(ThisWeek, 6, 8);
+                this.QueryTable(ThisWeek, 6, 10);
+                this.QueryTable(ThisWeek, 7, 1);
+                this.QueryTable(ThisWeek, 7, 3);
+                this.QueryTable(ThisWeek, 7, 6);
+                this.QueryTable(ThisWeek, 7, 8);
+                this.QueryTable(ThisWeek, 7, 10);
+                // this.forceUpdate();
+              },
             }}>
-            <Tab.Screen name="第1周" component={MainView} />
-            <Tab.Screen name="第2周" component={FlatView} />
-            <Tab.Screen name="第3周" component={FlatView} />
-            <Tab.Screen name="第4周" component={FlatView} />
-            <Tab.Screen name="第5周" component={FlatView} />
-            <Tab.Screen name="第6周" component={FlatView} />
+            {arrA.map(v => (
+              <Tab.Screen
+                name={'第' + v.id + '周'}
+                component={MainView}
+                key={v.id}
+                onPress={() => {
+                  ThisWeek = v.id;
+                  this.setState({week: v.id});
+                  console.log('#' + ThisWeek);
+                }}
+              />
+            ))}
           </Tab.Navigator>
           <PreviewLayout values={['更新', '设置', '课表']}></PreviewLayout>
         </NavigationContainer>
@@ -535,22 +695,6 @@ class App extends React.Component {
   }
 }
 
-const PreviewLayout = ({children, values}) => (
-  <View style={{padding: 10, height: 50, backgroundColor: '#4099FF'}}>
-    <View style={styles.row}>
-      <TouchableOpacity style={[styles.button]}>
-        <Icon name="calendar" type="evilicon" color="white" />
-      </TouchableOpacity>
-      <TouchableOpacity style={[styles.button]}>
-        <Icon name="arrow-down" type="evilicon" color="white" />
-      </TouchableOpacity>
-      <TouchableOpacity style={[styles.button]}>
-        <Icon name="gear" type="evilicon" color="white" />
-      </TouchableOpacity>
-    </View>
-    <View style={[styles.container]}>{children}</View>
-  </View>
-);
 // 逻辑函数
 
 // 创建函数返回当前日期（年月日）
@@ -652,9 +796,16 @@ const getData = async w => {
 
 function ClassTableItem(props) {
   const tailwind = useTailwind();
+  // console.log('##' + props.classInfo[1] + props.type);
   // console.log('!@#' + props.classInfo[1]);
-  if (props.data === null || props.classInfo[1] === undefined) {
+  // console.log('!@#' + props.classInfo[1] + '@' + props.classInfo[4]);
+  if (
+    props.data === null ||
+    (props.classInfo[1] === undefined && props.type !== 3)
+  ) {
     return <View style={[styles.item_enpty]}></View>;
+  } else if (props.classInfo[1] === undefined && props.type === 3) {
+    return <View style={[styles.item_enpty_1]}></View>;
   } else {
     if (props.classInfo[5] === 5 || props.classInfo[5] === 12) {
       return (
@@ -666,7 +817,10 @@ function ClassTableItem(props) {
         </View>
       );
     } else {
-      if (props.classInfo[6] === 4) {
+      if (
+        props.classInfo[6] === 4 ||
+        (props.classInfo[7] === 4 && props.classInfo[0] === 3)
+      ) {
         return (
           <View style={[styles.item_2]}>
             <Text numberOfLines={5} style={[styles.item_child]}>
@@ -717,7 +871,7 @@ const styles = StyleSheet.create({
     width: ScreenWidth / 7.8,
     height: ScreenHeight * 0.17,
     padding: 5,
-    borderRadius: 16,
+    borderRadius: 11,
     backgroundColor: '#2A82E4',
     borderColor: '#5DA4F5',
     borderWidth: 3,
@@ -744,6 +898,15 @@ const styles = StyleSheet.create({
     height: ScreenHeight * 0.11,
     padding: 5,
     margin: 1.5,
+  },
+  item_enpty_1: {
+    width: ScreenWidth / 7.8,
+    height: ScreenHeight * 0.17,
+    padding: 5,
+    display: 'flex',
+    justifyContent: 'center',
+    margin: 1.5,
+    marginBottom: 7,
   },
   item_child: {
     color: 'white',
