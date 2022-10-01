@@ -3,45 +3,46 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react-native/no-inline-styles */
 
-// import Icon from 'react-native-vector-icons/FontAwesome';
 import React, {useState, useEffect} from 'react';
-// import {Node} from 'react';
-// import {HelloWorld} from './components/HelloWorld';
 import {NavigationContainer} from '@react-navigation/native';
-// import {createNativeStackNavigator} from '@react-navigation/native-stack';
-// import {ClassTableItem} from './components/ClassTableItem';
 const moment = require('moment');
 import {useTailwind} from 'tailwind-rn';
 import {TailwindProvider} from 'tailwind-rn';
 import utilities from './tailwind.json';
-// import {TabView, Tab} from '@rneui/themed';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Icon} from '@rneui/themed';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
-import {EasyLoading, Loading} from './components/EasyLoading';
 import Toast from 'react-native-toast-message';
-// import {Tree} from './components/Tree';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {Input, Button} from '@rneui/themed';
+// import DatePicker from 'react-native-date-picker';
+// import ReactiveButton from 'reactive-button';
 let firstWeek = '2022-08-29';
 const id = '201002423';
 const pwd = 'Wer7727048.';
 const semester = '2022-2023-1';
 let jsonValue = null;
-let week = 4;
+let week = getWeek();
 let weekNum = 18;
+
 let tken;
 let itemHeight = 90;
 let fga = 0;
 import {
   Text,
   View,
-  Button,
+  // Button,
   Alert,
   StyleSheet,
   TouchableOpacity,
   FlatList,
   SafeAreaView,
   Dimensions,
+  ActivityIndicator,
+  ScrollView,
 } from 'react-native';
+
+let arrA = [];
 
 const ScreenHeight = Dimensions.get('window').height;
 const ScreenWidth = Dimensions.get('window').width;
@@ -97,28 +98,30 @@ let tableData = [
   },
 ];
 // 创建主函数
-class App extends React.Component {
+class AppMain extends React.Component {
   constructor(props) {
     super(props);
-    this.getAllData();
+
+    // this.getAllData();
     this.state = {
       isloading: true,
       week: 1,
       index: 0,
       windowSize: 0,
       visible: false,
+      user_id: '',
+      password: '',
     };
   }
 
-  componentWillMount() {
+  // 事件挂载
+  UNSAFE_componentWillMount() {
     this.setState({
       isloading: true,
     });
-    console.log('执行了componentWillMount');
     this.getAllData();
-
-    // this.forceUpdate();
   }
+
   UpdateAll = async () => {
     console.log('执行了UpdateAll');
     for (let i = 1; i < weekNum + 1; i++) {
@@ -138,7 +141,15 @@ class App extends React.Component {
 
   getAllData = async () => {
     try {
+      // await Crawl();
       console.log('开始获取数据');
+      weekNum = await AsyncStorage.getItem('weeknum').catch(e => {
+        console.log('读取课表失败' + e);
+      });
+      console.log('weekNum' + weekNum);
+      for (let r = 1; r <= weekNum; r++) {
+        arrA[r] = {id: r};
+      }
       let arr_1 = [];
       for (let i = 1; i < weekNum + 1; i++) {
         arr_1[i] = i;
@@ -147,20 +158,13 @@ class App extends React.Component {
       let flag = 0;
       arr_1.forEach(async is => {
         flag = is;
-        // console.log('&&&&&&&&&&&&&&&&&&&&&&数据' + is);
         let id_o = '@' + is;
         jsValue[is] = await AsyncStorage.getItem(id_o).catch(e => {
-          console.log('读取失败' + e);
+          console.log('读取课表失败' + e);
         });
         tableData[is] = JSON.parse(jsValue[is]);
-        // console.log('&&&&&&&&&&&&&&&&&&&&&&数据' + tableData[is]);
         let jf = JSON.parse(jsValue[is]);
-        // return jsonValue != null ? JSON.parse(jsonValue) : null;
       });
-      // if (flag === weekNum && jsValue[weekNum] !== null) {
-      //   console.log('￥￥￥￥￥￥￥￥￥结束' + this.state.isloading);
-      //   this.setState({isloading: false});
-      // }
 
       setTimeout(() => {
         this.QueryTable(ThisWeek, 1, 1);
@@ -198,8 +202,6 @@ class App extends React.Component {
         this.QueryTable(ThisWeek, 7, 6);
         this.QueryTable(ThisWeek, 7, 8);
         this.QueryTable(ThisWeek, 7, 10);
-        // console.log('￥￥￥￥￥￥￥￥￥结束' + this.state.isloading);
-        // console.log(tableData[5]);
         this.setState({isloading: false});
       }, 200);
 
@@ -505,7 +507,6 @@ class App extends React.Component {
       }
     });
     if (flag === false) {
-      // console.log('#############################################无课');
       tableName = 'table' + wa + '_' + cn;
       classInfo[1] = '无'; //课程名称
       classInfo[2] = '无'; //教师名称
@@ -575,33 +576,18 @@ class App extends React.Component {
       );
     };
 
-    const arrA = [
-      {id: 1},
-      {id: 2},
-      {id: 3},
-      {id: 4},
-      {id: 5},
-      {id: 6},
-      {id: 7},
-      {id: 8},
-      {id: 9},
-      {id: 10},
-      {id: 11},
-      {id: 12},
-      {id: 13},
-    ];
     const PreviewLayout = ({children, values}) => (
       <View style={{padding: 10, height: 50, backgroundColor: '#4099FF'}}>
         <View style={styles.row}>
-          <TouchableOpacity style={[styles.button]}>
+          {/* <TouchableOpacity style={[styles.button]}>
             <Icon name="calendar" type="evilicon" color="white" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity style={[styles.button]} onPress={this.UpdateAll}>
             <Icon name="arrow-down" type="evilicon" color="white" />
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.button]}>
+          {/* <TouchableOpacity style={[styles.button]}>
             <Icon name="gear" type="evilicon" color="white" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
         <View style={[styles.container]}>{children}</View>
       </View>
@@ -615,8 +601,9 @@ class App extends React.Component {
 
       if (Loadings) {
         return (
-          <View>
-            <Text>正在加载</Text>
+          <View
+            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+            <Text>Loading!</Text>
           </View>
         );
       } else {
@@ -637,7 +624,13 @@ class App extends React.Component {
                 float: 'left',
                 // display: 'inline-block',
               }}>
-              <Text style={{height: 30, marginTop: 5}}>9月</Text>
+              <Icon
+                style={{height: 22, width: 22, marginTop: 5}}
+                name="trophy"
+                type="evilicon"
+                color="rgba(78, 116, 289, 1)"
+              />
+              {/* <Text style={{height: 30, marginTop: 5}}>\</Text> */}
               <FlatList
                 data={CS}
                 renderItem={Pitem}
@@ -715,135 +708,159 @@ class App extends React.Component {
     };
     if (isloading) {
       return (
-        <>
-          <Text>isLoading...</Text>
-        </>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            color: 'deepskyblue',
+            alignItems: 'center',
+            backgroundColor: '#eff6ff',
+          }}>
+          <ActivityIndicator size="large" color="rgba(78, 116, 289, 1)" />
+          <Text style={{fontSize: 30, fontWeight: 'bold', color: 'black'}}>
+            林棵
+          </Text>
+          <Text
+            style={{
+              fontSize: 30,
+              fontWeight: 'bold',
+              color: 'rgba(78, 116, 289, 1)',
+            }}>
+            LinClass
+          </Text>
+        </View>
       );
     } else {
       return (
         <TailwindProvider utilities={utilities}>
-          <NavigationContainer>
-            <Tab.Navigator
-              screenOptions={{
-                tabBarScrollEnabled: true,
-                tabBarItemStyle: {
-                  width: 70,
-                  height: 50,
-                  backgroundColor: '#4099FF',
-                },
-                tabBarStyle: {
-                  backgroundColor: 'powderblue',
-                  marginBottom: 5,
-                },
-                tabBarActiveTintColor: 'white',
-                tabBarIndicatorStyle: {
-                  backgroundColor: 'white',
-                  height: 3,
-                  width: 90,
-                },
-              }}
-              screenListeners={{
-                state: e => {
-                  // Do something with the state
-                  // console.log('state changed', e.data.state.index);
-                  if (fga === 0) {
+          {/* <NavigationContainer> */}
+          <Tab.Navigator
+            initialRouteName={'第' + week + '周'}
+            screenOptions={{
+              tabBarScrollEnabled: true,
+              tabBarItemStyle: {
+                width: 70,
+                height: 50,
+                backgroundColor: 'rgba(78, 116, 289, 1)',
+              },
+              tabBarStyle: {
+                backgroundColor: 'powderblue',
+                // marginBottom: 5,
+              },
+              tabBarActiveTintColor: 'white',
+              tabBarIndicatorStyle: {
+                backgroundColor: 'white',
+                height: 3,
+                width: 90,
+              },
+            }}
+            screenListeners={{
+              state: e => {
+                // Do something with the state
+                // console.log('state changed', e.data.state.index);
+                // if (fga === 0) {
+                //   showToast();
+                // }
+                // fga = 0;
+                ThisWeek = e.data.state.index + 1;
+                tablea1_1 = [];
+                tablea1_3 = [];
+                tablea1_6 = [];
+                tablea1_8 = [];
+                tablea1_10 = [];
+                tablea2_1 = [];
+                tablea2_3 = [];
+                tablea2_6 = [];
+                tablea2_8 = [];
+                tablea2_10 = [];
+                tablea3_1 = [];
+                tablea3_3 = [];
+                tablea3_6 = [];
+                tablea3_8 = [];
+                tablea3_10 = [];
+                tablea4_1 = [];
+                tablea4_3 = [];
+                tablea4_6 = [];
+                tablea4_8 = [];
+                tablea4_10 = [];
+                tablea5_1 = [];
+                tablea5_3 = [];
+                tablea5_6 = [];
+                tablea5_8 = [];
+                tablea5_10 = [];
+                tablea6_1 = [];
+                tablea6_3 = [];
+                tablea6_6 = [];
+                tablea6_8 = [];
+                tablea6_10 = [];
+                tablea7_1 = [];
+                tablea7_3 = [];
+                tablea7_6 = [];
+                tablea7_8 = [];
+                tablea7_10 = [];
+                // this.forceUpdate();
+                this.QueryTable(ThisWeek, 1, 1);
+                this.QueryTable(ThisWeek, 1, 3);
+                this.QueryTable(ThisWeek, 1, 6);
+                this.QueryTable(ThisWeek, 1, 8);
+                this.QueryTable(ThisWeek, 1, 10);
+                this.QueryTable(ThisWeek, 2, 1);
+                this.QueryTable(ThisWeek, 2, 3);
+                this.QueryTable(ThisWeek, 2, 6);
+                this.QueryTable(ThisWeek, 2, 8);
+                this.QueryTable(ThisWeek, 2, 10);
+                this.QueryTable(ThisWeek, 3, 1);
+                this.QueryTable(ThisWeek, 3, 3);
+                this.QueryTable(ThisWeek, 3, 6);
+                this.QueryTable(ThisWeek, 3, 8);
+                this.QueryTable(ThisWeek, 3, 10);
+                this.QueryTable(ThisWeek, 4, 1);
+                this.QueryTable(ThisWeek, 4, 3);
+                this.QueryTable(ThisWeek, 4, 6);
+                this.QueryTable(ThisWeek, 4, 8);
+                this.QueryTable(ThisWeek, 4, 10);
+                this.QueryTable(ThisWeek, 5, 1);
+                this.QueryTable(ThisWeek, 5, 3);
+                this.QueryTable(ThisWeek, 5, 6);
+                this.QueryTable(ThisWeek, 5, 8);
+                this.QueryTable(ThisWeek, 5, 10);
+                this.QueryTable(ThisWeek, 6, 1);
+                this.QueryTable(ThisWeek, 6, 3);
+                this.QueryTable(ThisWeek, 6, 6);
+                this.QueryTable(ThisWeek, 6, 8);
+                this.QueryTable(ThisWeek, 6, 10);
+                this.QueryTable(ThisWeek, 7, 1);
+                this.QueryTable(ThisWeek, 7, 3);
+                this.QueryTable(ThisWeek, 7, 6);
+                this.QueryTable(ThisWeek, 7, 8);
+                this.QueryTable(ThisWeek, 7, 10);
+                // this.forceUpdate();
+                this.setState({
+                  week: e.data.state.index + 1,
+                });
+                // this._showLoading();
+              },
+            }}>
+            {arrA.map(v => (
+              <Tab.Screen
+                name={'第' + v.id + '周'}
+                component={MainView}
+                key={v.id}
+                options={{
+                  // 解决过慢问题
+                  lazy: true,
+                }}
+                listeners={{
+                  tabPress: e => {
                     showToast();
-                  }
-                  fga = 0;
-                  ThisWeek = e.data.state.index + 1;
-                  tablea1_1 = [];
-                  tablea1_3 = [];
-                  tablea1_6 = [];
-                  tablea1_8 = [];
-                  tablea1_10 = [];
-                  tablea2_1 = [];
-                  tablea2_3 = [];
-                  tablea2_6 = [];
-                  tablea2_8 = [];
-                  tablea2_10 = [];
-                  tablea3_1 = [];
-                  tablea3_3 = [];
-                  tablea3_6 = [];
-                  tablea3_8 = [];
-                  tablea3_10 = [];
-                  tablea4_1 = [];
-                  tablea4_3 = [];
-                  tablea4_6 = [];
-                  tablea4_8 = [];
-                  tablea4_10 = [];
-                  tablea5_1 = [];
-                  tablea5_3 = [];
-                  tablea5_6 = [];
-                  tablea5_8 = [];
-                  tablea5_10 = [];
-                  tablea6_1 = [];
-                  tablea6_3 = [];
-                  tablea6_6 = [];
-                  tablea6_8 = [];
-                  tablea6_10 = [];
-                  tablea7_1 = [];
-                  tablea7_3 = [];
-                  tablea7_6 = [];
-                  tablea7_8 = [];
-                  tablea7_10 = [];
-
-                  this.QueryTable(ThisWeek, 1, 1);
-                  this.QueryTable(ThisWeek, 1, 3);
-                  this.QueryTable(ThisWeek, 1, 6);
-                  this.QueryTable(ThisWeek, 1, 8);
-                  this.QueryTable(ThisWeek, 1, 10);
-                  this.QueryTable(ThisWeek, 2, 1);
-                  this.QueryTable(ThisWeek, 2, 3);
-                  this.QueryTable(ThisWeek, 2, 6);
-                  this.QueryTable(ThisWeek, 2, 8);
-                  this.QueryTable(ThisWeek, 2, 10);
-                  this.QueryTable(ThisWeek, 3, 1);
-                  this.QueryTable(ThisWeek, 3, 3);
-                  this.QueryTable(ThisWeek, 3, 6);
-                  this.QueryTable(ThisWeek, 3, 8);
-                  this.QueryTable(ThisWeek, 3, 10);
-                  this.QueryTable(ThisWeek, 4, 1);
-                  this.QueryTable(ThisWeek, 4, 3);
-                  this.QueryTable(ThisWeek, 4, 6);
-                  this.QueryTable(ThisWeek, 4, 8);
-                  this.QueryTable(ThisWeek, 4, 10);
-                  this.QueryTable(ThisWeek, 5, 1);
-                  this.QueryTable(ThisWeek, 5, 3);
-                  this.QueryTable(ThisWeek, 5, 6);
-                  this.QueryTable(ThisWeek, 5, 8);
-                  this.QueryTable(ThisWeek, 5, 10);
-                  this.QueryTable(ThisWeek, 6, 1);
-                  this.QueryTable(ThisWeek, 6, 3);
-                  this.QueryTable(ThisWeek, 6, 6);
-                  this.QueryTable(ThisWeek, 6, 8);
-                  this.QueryTable(ThisWeek, 6, 10);
-                  this.QueryTable(ThisWeek, 7, 1);
-                  this.QueryTable(ThisWeek, 7, 3);
-                  this.QueryTable(ThisWeek, 7, 6);
-                  this.QueryTable(ThisWeek, 7, 8);
-                  this.QueryTable(ThisWeek, 7, 10);
-                  this.forceUpdate();
-                  // this._showLoading();
-                },
-              }}>
-              {arrA.map(v => (
-                <Tab.Screen
-                  name={'第' + v.id + '周'}
-                  component={MainView}
-                  key={v.id}
-                  listeners={{
-                    tabPress: e => {
-                      // Prevent default action
-                      showToast();
-                      fga = 1;
-                    },
-                  }}
-                />
-              ))}
-            </Tab.Navigator>
-            <Toast />
-            <PreviewLayout values={['更新', '设置', '课表']}></PreviewLayout>
-          </NavigationContainer>
+                    fga = 1;
+                  },
+                }}
+              />
+            ))}
+          </Tab.Navigator>
+          {/* <Toast /> */}
+          {/* <PreviewLayout values={['更新', '设置', '课表']}></PreviewLayout> */}
         </TailwindProvider>
       );
     }
@@ -894,7 +911,8 @@ function Crawl() {
   Http.onreadystatechange = function () {
     // console.log(this.responseText);
     rep = this.responseText;
-    let res = JSON.parse(rep);
+    console.log(rep);
+    let res = JSON.parse(this.responseText);
     tken = res.token;
     let HttpRequest = [];
     // 循环获取整个学期的课表
@@ -924,7 +942,7 @@ function Crawl() {
 // 存储数据到缓存
 const storeData = async (id_data, value) => {
   try {
-    // console.log('存储数据');
+    console.log('存储数据');
     jsonValue = JSON.stringify(value);
     await AsyncStorage.setItem(id_data, jsonValue);
   } catch (e) {
@@ -953,17 +971,23 @@ const showToast = () => {
   Toast.show({
     type: 'info',
     text1: 'LOADING',
-    text2: '🍖 疯狂加载中 🏅',
-    visibilityTime: 200,
+    text2: '疯狂加载中🚀🚀',
+    visibilityTime: 50,
+  });
+};
+
+const showToast_1 = () => {
+  console.log('showToast_1');
+  Toast.show({
+    type: 'info',
+    text1: '保存成功',
+    text2: '该信息已保存在本地缓存，不会被上传到网络🔐',
+    visibilityTime: 4000,
   });
 };
 
 function ClassTableItem(props) {
   const tailwind = useTailwind();
-  // console.log('##' + props.classInfo[1] + props.type);
-  // console.log('!@#');
-  // console.log(props);
-  // console.log('!@#' + props.classInfo[1] + '@' + props.classInfo[4]);
   if (
     props.data === null ||
     (props.classInfo[1] === undefined && props.type !== 3)
@@ -984,7 +1008,8 @@ function ClassTableItem(props) {
     } else {
       if (
         props.classInfo[6] === 4 ||
-        (props.classInfo[7] === 4 && props.classInfo[0] === 3)
+        (props.classInfo[7] === 4 && props.classInfo[0] === 3) ||
+        (props.classInfo[7] === 9 && props.classInfo[0] === 8)
       ) {
         return (
           <View style={[styles.item_2]}>
@@ -1025,9 +1050,9 @@ const styles = StyleSheet.create({
     height: ScreenHeight * 0.11,
     padding: 5,
     borderRadius: 11,
-    backgroundColor: '#2A82E4',
-    borderColor: '#5DA4F5',
-    borderWidth: 3,
+    backgroundColor: 'rgba(78, 116, 289, 1)',
+    borderColor: 'rgba(78, 101, 255, 1)',
+    borderWidth: 2,
     display: 'flex',
     justifyContent: 'center',
     margin: 1.5,
@@ -1037,9 +1062,9 @@ const styles = StyleSheet.create({
     height: ScreenHeight * 0.17,
     padding: 5,
     borderRadius: 11,
-    backgroundColor: '#2A82E4',
-    borderColor: '#5DA4F5',
-    borderWidth: 3,
+    backgroundColor: 'rgba(78, 116, 289, 1)',
+    borderColor: 'rgba(78, 101, 255, 1)',
+    borderWidth: 2,
     display: 'flex',
     justifyContent: 'center',
     margin: 1.5,
@@ -1050,9 +1075,9 @@ const styles = StyleSheet.create({
     height: ScreenHeight * 0.11,
     padding: 5,
     borderRadius: 11,
-    backgroundColor: '#2A82E4',
-    borderColor: '#5DA4F5',
-    borderWidth: 3,
+    backgroundColor: 'rgba(78, 116, 289, 1)',
+    borderColor: 'rgba(78, 101, 255, 1)',
+    borderWidth: 2,
     display: 'flex',
     justifyContent: 'center',
     margin: 1.5,
@@ -1103,20 +1128,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     height: 100,
   },
-  button: {
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    borderRadius: 4,
-    backgroundColor: '#2A82E4',
-    alignSelf: 'center',
-    marginHorizontal: '1%',
-    marginBottom: 1,
-    minWidth: '30%',
-    textAlign: 'center',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'white',
-  },
+  // button: {
+  //   paddingHorizontal: 8,
+  //   paddingVertical: 6,
+  //   borderRadius: 4,
+  //   // backgroundColor: '#2A82E4',
+  //   alignSelf: 'center',
+  //   marginHorizontal: '1%',
+  //   marginBottom: 1,
+  //   minWidth: '100%',
+  //   textAlign: 'center',
+  //   alignItems: 'center',
+  //   justifyContent: 'center',
+  //   color: 'white',
+  // },
   selected: {
     backgroundColor: 'coral',
     borderWidth: 0,
@@ -1155,4 +1180,193 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App;
+function SettingsScreen() {
+  const [studentid, setStudentid] = useState('');
+  const [password, setPassword] = useState('');
+  const [begindate, setBegindate] = useState('');
+  const [weeknum, setWeeknum] = useState('18');
+  const WriteBeginDate = async () => {
+    try {
+      showToast_1();
+      let dataid = 'begindate';
+      await AsyncStorage.setItem(dataid, begindate);
+      dataid = 'weeknum';
+      await AsyncStorage.setItem(dataid, weeknum);
+      dataid = 'studentid';
+      await AsyncStorage.setItem(dataid, studentid);
+      dataid = 'password';
+      await AsyncStorage.setItem(dataid, password);
+    } catch (e) {
+      console.log('存储失败' + e);
+    }
+  };
+  return (
+    <>
+      <SafeAreaView style={{flex: 1}}>
+        <ScrollView
+          contentContainerStyle={{
+            alignItems: 'center',
+            backgroundColor: '#eff6ff',
+            width: '100%',
+          }}
+          alwaysBounceHorizontal="true">
+          <Input
+            placeholder="输入学号"
+            leftIcon={{
+              type: 'evilicon',
+              name: 'user',
+              color: 'rgba(78, 116, 289, 1)',
+            }}
+            style={{fontSize: 12}}
+            containerStyle={{
+              width: '95%',
+              // backgroundColor: 'rgba',
+              marginTop: 10,
+              color: 'white',
+            }}
+            label="常规"
+            labelStyle={{color: 'rgba(78, 116, 289, 1)'}}
+            onChangeText={value => setStudentid(value)}
+            // inputContainerStyle={{color: '#fff'}}
+            // onChangeText={value => this.setState({user_id: value})}
+          />
+          <Input
+            placeholder="输入密码"
+            leftIcon={{
+              type: 'evilicon',
+              name: 'lock',
+              color: 'rgba(78, 116, 289, 1)',
+            }}
+            style={{fontSize: 12}}
+            containerStyle={{width: '95%'}}
+            // onChangeText={value => this.setState({password: value})}
+            secureTextEntry={true}
+            onChangeText={value => setPassword(value)}
+          />
+          <Input
+            placeholder="学期开始日期，格式：2022-08-27"
+            leftIcon={{
+              type: 'evilicon',
+              name: 'clock',
+              color: 'rgba(78, 116, 289, 1)',
+            }}
+            style={{fontSize: 12}}
+            containerStyle={{
+              width: '95%',
+              // backgroundColor: 'rgba',
+              marginTop: 10,
+              color: 'white',
+            }}
+            label="学期信息"
+            labelStyle={{color: 'rgba(78, 116, 289, 1)'}}
+            onChangeText={value => setBegindate(value)}
+          />
+          <Input
+            placeholder="学期周数，例：18"
+            leftIcon={{
+              type: 'evilicon',
+              name: 'chart',
+              color: 'rgba(78, 116, 289, 1)',
+            }}
+            style={{fontSize: 12}}
+            containerStyle={{
+              width: '95%',
+              // backgroundColor: 'rgba',
+              color: 'white',
+            }}
+            onChangeText={value => setWeeknum(value)}
+          />
+          <View
+            style={{
+              width: '80%',
+            }}>
+            <Button
+              title="保存"
+              type="outline"
+              buttonStyle={{
+                borderColor: 'rgba(78, 116, 289, 1)',
+              }}
+              titleStyle={{color: 'rgba(78, 116, 289, 1)'}}
+              containerStyle={{
+                width: '100%',
+              }}
+              onPress={() => {
+                showToast_1();
+                WriteBeginDate();
+              }}
+            />
+            <Button
+              title="刷新课表"
+              // type="outline"
+              buttonStyle={{
+                backgroundColor: 'rgba(78, 116, 289, 1)',
+                // borderColor: 'rgba(78, 116, 289, 1)',
+                marginTop: 10,
+              }}
+              titleStyle={{color: 'white'}}
+              containerStyle={{
+                width: '100%',
+              }}
+            />
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+      {/* <Toast /> */}
+    </>
+  );
+}
+
+const Tab = createBottomTabNavigator();
+
+function BottomTabs() {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        tabBarShowLabel: true,
+
+        tabBarStyle: {backgroundColor: 'rgba(78, 116, 289, 1)'},
+        // tabBarLabel: {color: 'white'},
+        tabBarLabelStyle: {color: 'white'},
+        tabBarLabelPosition: 'beside-icon',
+      }}>
+      <Tab.Screen
+        options={{
+          headerShown: false,
+          tabBarIcon: ({color, size}) => (
+            <Icon name="calendar" type="evilicon" color="white" />
+          ),
+        }}
+        name="课表"
+        component={AppMain}
+      />
+      <Tab.Screen
+        name="设置"
+        options={{
+          tabBarIcon: ({color, size}) => (
+            <Icon name="gear" type="evilicon" color="white" />
+          ),
+          headerTitle: '林课 LinClass',
+          headerTintColor: 'white',
+          headerStyle: {
+            height: 50,
+            backgroundColor: 'rgba(78, 116, 289, 1)',
+          },
+        }}
+        component={SettingsScreen}
+      />
+    </Tab.Navigator>
+  );
+}
+
+// export default App;
+
+export default function App() {
+  return (
+    <>
+      <NavigationContainer>
+        <BottomTabs />
+      </NavigationContainer>
+      <Toast />
+    </>
+  );
+}
