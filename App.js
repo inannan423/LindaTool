@@ -15,12 +15,11 @@ import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs
 import Toast from 'react-native-toast-message';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {Input, Button} from '@rneui/themed';
-// import DatePicker from 'react-native-date-picker';
-// import ReactiveButton from 'reactive-button';
+
 let firstWeek = '2022-08-29';
-const id = '201002423';
-const pwd = 'Wer7727048.';
-const semester = '2022-2023-1';
+let id = '';
+let pwd = '';
+let semester = '2022-2023-1';
 let jsonValue = null;
 let week = getWeek();
 let weekNum = 18;
@@ -40,6 +39,8 @@ import {
   Dimensions,
   ActivityIndicator,
   ScrollView,
+  Share,
+  Clipboard,
 } from 'react-native';
 
 let arrA = [];
@@ -101,8 +102,8 @@ let tableData = [
 class AppMain extends React.Component {
   constructor(props) {
     super(props);
-
-    // this.getAllData();
+    // Crawl();
+    this.getAllData();
     this.state = {
       isloading: true,
       week: 1,
@@ -142,11 +143,25 @@ class AppMain extends React.Component {
   getAllData = async () => {
     try {
       // await Crawl();
+      id = await AsyncStorage.getItem('studentid').catch(e => {
+        console.log('读取学号失败' + e);
+        showToast_Getfalse();
+      });
+      pwd = await AsyncStorage.getItem('password').catch(e => {
+        console.log('读取密码失败' + e);
+        showToast_Getfalse();
+      });
       console.log('开始获取数据');
       weekNum = await AsyncStorage.getItem('weeknum').catch(e => {
-        console.log('读取课表失败' + e);
+        console.log('读取周数失败' + e);
       });
-      console.log('weekNum' + weekNum);
+      semester = await AsyncStorage.getItem('sesmeter').catch(e => {
+        console.log('读取学期失败' + e);
+      });
+      firstWeek = await AsyncStorage.getItem('begindate').catch(e => {
+        console.log('读取学期开始失败' + e);
+      });
+
       for (let r = 1; r <= weekNum; r++) {
         arrA[r] = {id: r};
       }
@@ -222,7 +237,8 @@ class AppMain extends React.Component {
     wk = parseInt(wk);
     wa = parseInt(wa);
     cn = parseInt(cn);
-    fdata = JSON.parse(tableData[wk]);
+    // console.log('执行了QueryTable' + tableData[wk]);
+    let fdata = JSON.parse(tableData[wk]);
     let flag = true;
     let classInfo = [];
 
@@ -545,12 +561,19 @@ class AppMain extends React.Component {
       {id: 12},
       {id: 13},
     ];
-    const lineheight = Dimensions.get('window').height * 0.057;
+    const lineheight = Dimensions.get('window').height * 0.058;
     // 左侧课程序号组件
     const Pitem = ({item}) => {
       return (
         <View>
-          <Text style={{lineHeight: lineheight, marginLeft: 2}}>{item.id}</Text>
+          <Text
+            style={{
+              lineHeight: lineheight,
+              marginLeft: 2,
+              color: 'rgba(78, 116, 289, 1)',
+            }}>
+            {item.id}
+          </Text>
         </View>
       );
     };
@@ -728,6 +751,24 @@ class AppMain extends React.Component {
             }}>
             LinClass
           </Text>
+
+          <Text
+            style={{
+              fontSize: 15,
+              fontWeight: 'thin',
+              color: 'black',
+            }}>
+            {/* <Icon name="sc-github" type="evilicon" color="black" /> */}
+            github/inannan423 | Jetzihan
+          </Text>
+          <Text
+            style={{
+              fontSize: 10,
+              fontWeight: 'bold',
+              color: 'black',
+            }}>
+            初次进入请先填写信息
+          </Text>
         </View>
       );
     } else {
@@ -898,6 +939,7 @@ function getWeekDay() {
 
 // 网络爬虫
 function Crawl() {
+  // console.log('爬虫开始' + id + ' ' + pwd);
   const Http = new XMLHttpRequest();
   let loginLink =
     'http://newjwxt.bjfu.edu.cn/app.do?method=authUser&xh=' +
@@ -911,7 +953,7 @@ function Crawl() {
   Http.onreadystatechange = function () {
     // console.log(this.responseText);
     rep = this.responseText;
-    console.log(rep);
+    // console.log(rep);
     let res = JSON.parse(this.responseText);
     tken = res.token;
     let HttpRequest = [];
@@ -936,13 +978,14 @@ function Crawl() {
         storeData(id_d, jsonValue);
       };
     }
+    showToast_Error();
   };
 }
 
 // 存储数据到缓存
 const storeData = async (id_data, value) => {
   try {
-    console.log('存储数据');
+    // console.log('存储数据');
     jsonValue = JSON.stringify(value);
     await AsyncStorage.setItem(id_data, jsonValue);
   } catch (e) {
@@ -975,13 +1018,47 @@ const showToast = () => {
     visibilityTime: 50,
   });
 };
+const showToast_Getfalse = () => {
+  Toast.show({
+    type: 'error',
+    text1: '课表获取失败',
+    text2: '请检查信息是否正确',
+    visibilityTime: 4000,
+  });
+};
 
 const showToast_1 = () => {
-  console.log('showToast_1');
   Toast.show({
     type: 'info',
     text1: '保存成功',
     text2: '该信息已保存在本地缓存，不会被上传到网络🔐',
+    visibilityTime: 4000,
+  });
+};
+
+const showToast_Error = () => {
+  Toast.show({
+    type: 'success',
+    text1: '读取成功！请关闭后台重启APP',
+    text2: '课表刷新成功，重启应用后就可以正常使用了🎉🎉',
+    visibilityTime: 10000,
+  });
+};
+
+const showToast_Share = () => {
+  Toast.show({
+    type: 'success',
+    text1: '分享！',
+    text2: '感谢分享！🎉🎉',
+    visibilityTime: 4000,
+  });
+};
+
+const showToast_False = () => {
+  Toast.show({
+    type: 'error',
+    text1: '分享失败',
+    text2: '都点开了，还不分享？🤔🤔',
     visibilityTime: 4000,
   });
 };
@@ -1181,10 +1258,11 @@ const styles = StyleSheet.create({
 });
 
 function SettingsScreen() {
-  const [studentid, setStudentid] = useState('');
-  const [password, setPassword] = useState('');
-  const [begindate, setBegindate] = useState('');
+  const [studentid, setStudentid] = useState('12345');
+  const [password, setPassword] = useState('12345');
+  const [begindate, setBegindate] = useState('2022-08-27');
   const [weeknum, setWeeknum] = useState('18');
+  const [sesmeter, setSesmeter] = useState('2022-2023-1');
   const WriteBeginDate = async () => {
     try {
       showToast_1();
@@ -1196,6 +1274,8 @@ function SettingsScreen() {
       await AsyncStorage.setItem(dataid, studentid);
       dataid = 'password';
       await AsyncStorage.setItem(dataid, password);
+      dataid = 'sesmeter';
+      await AsyncStorage.setItem(dataid, sesmeter);
     } catch (e) {
       console.log('存储失败' + e);
     }
@@ -1243,6 +1323,13 @@ function SettingsScreen() {
             secureTextEntry={true}
             onChangeText={value => setPassword(value)}
           />
+          <Text
+            style={{
+              fontSize: 12,
+              width: '90%',
+            }}>
+            *所有数据都存储在您手机本地，不会上传到网络，也不会泄露给第三方，开发者也无从知晓，请放心使用，使用本APP即代表你授权林棵使用以上信息，林棵只在查课时使用教务系统API时调用这些数据，没有其他任何接口。填写完成后请点击保存按钮，并点击刷新课表。
+          </Text>
           <Input
             placeholder="学期开始日期，格式：2022-08-27"
             leftIcon={{
@@ -1260,6 +1347,21 @@ function SettingsScreen() {
             label="学期信息"
             labelStyle={{color: 'rgba(78, 116, 289, 1)'}}
             onChangeText={value => setBegindate(value)}
+          />
+          <Input
+            placeholder="当前学期，格式:2022-2023-1"
+            leftIcon={{
+              type: 'evilicon',
+              name: 'paperclip',
+              color: 'rgba(78, 116, 289, 1)',
+            }}
+            style={{fontSize: 12}}
+            containerStyle={{
+              width: '95%',
+              // backgroundColor: 'rgba',
+              color: 'white',
+            }}
+            onChangeText={value => setSesmeter(value)}
           />
           <Input
             placeholder="学期周数，例：18"
@@ -1291,7 +1393,6 @@ function SettingsScreen() {
                 width: '100%',
               }}
               onPress={() => {
-                showToast_1();
                 WriteBeginDate();
               }}
             />
@@ -1307,14 +1408,104 @@ function SettingsScreen() {
               containerStyle={{
                 width: '100%',
               }}
+              onPress={() => {
+                // AppMain.forceUpdate();
+                Crawl();
+              }}
             />
+            <Button
+              title="分享"
+              // type="outline"
+              buttonStyle={{
+                backgroundColor: 'rgba(78, 116, 289, 1)',
+                // borderColor: 'rgba(78, 116, 289, 1)',
+                marginTop: 10,
+              }}
+              titleStyle={{color: 'white'}}
+              containerStyle={{
+                width: '100%',
+              }}
+              onPress={async () => {
+                // AppMain.forceUpdate();
+                onShare();
+              }}
+            />
+            <Button
+              title="开源仓库"
+              // type="outline"
+              buttonStyle={{
+                backgroundColor: 'rgba(78, 116, 289, 1)',
+                // borderColor: 'rgba(78, 116, 289, 1)',
+                marginTop: 10,
+              }}
+              titleStyle={{color: 'white'}}
+              containerStyle={{
+                width: '100%',
+              }}
+              onPress={() => {
+                // AppMain.forceUpdate();
+                Clipboard.setString('https://github.com/inannan423/LindaTool');
+              }}>
+              <Icon name="sc-github" type="evilicon" color="white" />
+              复制仓库地址
+            </Button>
           </View>
+
+          <Text
+            style={{
+              fontSize: 12,
+              width: '90%',
+              marginTop: 10,
+            }}>
+            *本软件仅供开源学习使用，任何恶意使用与本人无关。源代码已开源，欢迎大家star和贡献。
+          </Text>
+          <Text
+            style={{
+              fontSize: 12,
+              width: '90%',
+              marginTop: 20,
+
+              textAlign: 'center',
+              color: 'black',
+            }}>
+            林棵 | LinClass By Jetzh
+          </Text>
+          <Text
+            style={{
+              fontSize: 12,
+              width: '90%',
+              textAlign: 'center',
+              color: 'black',
+              marginBottom: 20,
+            }}>
+            Powered by React Native
+          </Text>
         </ScrollView>
       </SafeAreaView>
       {/* <Toast /> */}
     </>
   );
 }
+
+const onShare = async () => {
+  try {
+    const result = await Share.share({
+      message: '林棵 LinClass | 手机桌面端北林课表,下载地址:',
+    });
+    if (result.action === Share.sharedAction) {
+      if (result.activityType) {
+        showToast_Share();
+      } else {
+        showToast_Share();
+        // showToast_False();
+      }
+    } else if (result.action === Share.dismissedAction) {
+      showToast_False();
+    }
+  } catch (error) {
+    alert(error.message);
+  }
+};
 
 const Tab = createBottomTabNavigator();
 
@@ -1345,7 +1536,7 @@ function BottomTabs() {
           tabBarIcon: ({color, size}) => (
             <Icon name="gear" type="evilicon" color="white" />
           ),
-          headerTitle: '林课 LinClass',
+          headerTitle: '林棵 LinClass',
           headerTintColor: 'white',
           headerStyle: {
             height: 50,
