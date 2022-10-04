@@ -15,7 +15,8 @@ import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs
 import Toast from 'react-native-toast-message';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {Input, Button} from '@rneui/themed';
-
+// import SplashScreen from 'react-native-splash-screen';
+// import RNBootSplash from 'react-native-bootsplash';
 let firstWeek = '2022-08-29';
 let id = '';
 let pwd = '';
@@ -23,7 +24,6 @@ let semester = '2022-2023-1';
 let jsonValue = null;
 let week = getWeek();
 let weekNum = 18;
-
 let tken;
 let itemHeight = 90;
 let fga = 0;
@@ -41,15 +41,20 @@ import {
   ScrollView,
   Share,
   Clipboard,
+  Image,
 } from 'react-native';
 
+// 存储周次数据
 let arrA = [];
 
+// 获取屏幕尺寸
 const ScreenHeight = Dimensions.get('window').height;
 const ScreenWidth = Dimensions.get('window').width;
-let table_1 = [];
+// 当前周
 let ThisWeek = 1;
+// 缓存中读取的数据
 let tableJson = [];
+// 各节数据
 let tablea1_1 = [];
 let tablea1_3 = [];
 let tablea1_6 = [];
@@ -98,12 +103,13 @@ let tableData = [
     sjbz: '0',
   },
 ];
+
 // 创建主函数
 class AppMain extends React.Component {
   constructor(props) {
     super(props);
     // Crawl();
-    this.getAllData();
+    // showToast_Getfalse();
     this.state = {
       isloading: true,
       week: 1,
@@ -120,29 +126,22 @@ class AppMain extends React.Component {
     this.setState({
       isloading: true,
     });
+    // showToast_Getfalse();
+    // 执行读取缓存
     this.getAllData();
   }
-
-  UpdateAll = async () => {
-    console.log('执行了UpdateAll');
-    for (let i = 1; i < weekNum + 1; i++) {
-      await this.GetTableCache(i);
-    }
-
-    this.forceUpdate();
-  };
-
-  GetTableCache = async id => {
-    // console.log('执行了GetTableCache' + tableJson[id]);
-    let id_d = '@' + id;
-    let json = await getData(id_d);
-    json = JSON.parse(json);
-    tableJson[id] = json;
-  };
-
+  // componentDidMount() {
+  //   // SplashScreen.hide();
+  //   RNBootSplash.hide(); // immediate
+  //   RNBootSplash.hide({fade: true}); // fade
+  // }
+  // 读取缓存
   getAllData = async () => {
     try {
-      // await Crawl();
+      // showToast_Getfalse();
+      let ifsuc = await AsyncStorage.getItem('store_success').catch(e => {
+        console.log('读取失败' + e);
+      });
       id = await AsyncStorage.getItem('studentid').catch(e => {
         console.log('读取学号失败' + e);
         showToast_Getfalse();
@@ -162,65 +161,79 @@ class AppMain extends React.Component {
         console.log('读取学期开始失败' + e);
       });
 
-      for (let r = 1; r <= weekNum; r++) {
-        arrA[r] = {id: r};
-      }
-      let arr_1 = [];
-      for (let i = 1; i < weekNum + 1; i++) {
-        arr_1[i] = i;
-      }
-      let jsValue = [];
-      let flag = 0;
-      arr_1.forEach(async is => {
-        flag = is;
-        let id_o = '@' + is;
-        jsValue[is] = await AsyncStorage.getItem(id_o).catch(e => {
-          console.log('读取课表失败' + e);
+      // console.log('@#$' + ifsuc);
+      if (ifsuc === 'store_success') {
+        // 周次数据赋予初值
+        for (let r = 1; r <= weekNum; r++) {
+          arrA[r] = {id: r};
+        }
+
+        let arr_1 = [];
+        for (let i = 1; i < weekNum + 1; i++) {
+          arr_1[i] = i;
+        }
+
+        let jsValue = [];
+        arr_1.forEach(async is => {
+          flag = is;
+          let id_o = '@' + is;
+          jsValue[is] = await AsyncStorage.getItem(id_o).catch(e => {
+            console.log('读取课表失败' + e);
+          });
+          try {
+            // console.log(jsValue[is]);
+            // if (jsValue[is]) {
+            tableData[is] = JSON.parse(jsValue[is]);
+            // }
+            // tableData[is] = jsValue[is];
+            // console.log(tableData[is]);
+          } catch (e) {
+            // showToast_False();
+            return;
+          }
         });
-        tableData[is] = JSON.parse(jsValue[is]);
-        let jf = JSON.parse(jsValue[is]);
-      });
 
-      setTimeout(() => {
-        this.QueryTable(ThisWeek, 1, 1);
-        this.QueryTable(ThisWeek, 1, 3);
-        this.QueryTable(ThisWeek, 1, 6);
-        this.QueryTable(ThisWeek, 1, 8);
-        this.QueryTable(ThisWeek, 1, 10);
-        this.QueryTable(ThisWeek, 2, 1);
-        this.QueryTable(ThisWeek, 2, 3);
-        this.QueryTable(ThisWeek, 2, 6);
-        this.QueryTable(ThisWeek, 2, 8);
-        this.QueryTable(ThisWeek, 2, 10);
-        this.QueryTable(ThisWeek, 3, 1);
-        this.QueryTable(ThisWeek, 3, 3);
-        this.QueryTable(ThisWeek, 3, 6);
-        this.QueryTable(ThisWeek, 3, 8);
-        this.QueryTable(ThisWeek, 3, 10);
-        this.QueryTable(ThisWeek, 4, 1);
-        this.QueryTable(ThisWeek, 4, 3);
-        this.QueryTable(ThisWeek, 4, 6);
-        this.QueryTable(ThisWeek, 4, 8);
-        this.QueryTable(ThisWeek, 4, 10);
-        this.QueryTable(ThisWeek, 5, 1);
-        this.QueryTable(ThisWeek, 5, 3);
-        this.QueryTable(ThisWeek, 5, 6);
-        this.QueryTable(ThisWeek, 5, 8);
-        this.QueryTable(ThisWeek, 5, 10);
-        this.QueryTable(ThisWeek, 6, 1);
-        this.QueryTable(ThisWeek, 6, 3);
-        this.QueryTable(ThisWeek, 6, 6);
-        this.QueryTable(ThisWeek, 6, 8);
-        this.QueryTable(ThisWeek, 6, 10);
-        this.QueryTable(ThisWeek, 7, 1);
-        this.QueryTable(ThisWeek, 7, 3);
-        this.QueryTable(ThisWeek, 7, 6);
-        this.QueryTable(ThisWeek, 7, 8);
-        this.QueryTable(ThisWeek, 7, 10);
-        this.setState({isloading: false});
-      }, 200);
+        setTimeout(() => {
+          this.QueryTable(ThisWeek, 1, 1);
+          this.QueryTable(ThisWeek, 1, 3);
+          this.QueryTable(ThisWeek, 1, 6);
+          this.QueryTable(ThisWeek, 1, 8);
+          this.QueryTable(ThisWeek, 1, 10);
+          this.QueryTable(ThisWeek, 2, 1);
+          this.QueryTable(ThisWeek, 2, 3);
+          this.QueryTable(ThisWeek, 2, 6);
+          this.QueryTable(ThisWeek, 2, 8);
+          this.QueryTable(ThisWeek, 2, 10);
+          this.QueryTable(ThisWeek, 3, 1);
+          this.QueryTable(ThisWeek, 3, 3);
+          this.QueryTable(ThisWeek, 3, 6);
+          this.QueryTable(ThisWeek, 3, 8);
+          this.QueryTable(ThisWeek, 3, 10);
+          this.QueryTable(ThisWeek, 4, 1);
+          this.QueryTable(ThisWeek, 4, 3);
+          this.QueryTable(ThisWeek, 4, 6);
+          this.QueryTable(ThisWeek, 4, 8);
+          this.QueryTable(ThisWeek, 4, 10);
+          this.QueryTable(ThisWeek, 5, 1);
+          this.QueryTable(ThisWeek, 5, 3);
+          this.QueryTable(ThisWeek, 5, 6);
+          this.QueryTable(ThisWeek, 5, 8);
+          this.QueryTable(ThisWeek, 5, 10);
+          this.QueryTable(ThisWeek, 6, 1);
+          this.QueryTable(ThisWeek, 6, 3);
+          this.QueryTable(ThisWeek, 6, 6);
+          this.QueryTable(ThisWeek, 6, 8);
+          this.QueryTable(ThisWeek, 6, 10);
+          this.QueryTable(ThisWeek, 7, 1);
+          this.QueryTable(ThisWeek, 7, 3);
+          this.QueryTable(ThisWeek, 7, 6);
+          this.QueryTable(ThisWeek, 7, 8);
+          this.QueryTable(ThisWeek, 7, 10);
+          this.setState({isloading: false});
+        }, 200);
 
-      console.log('获取数据成功');
+        console.log('获取数据成功');
+      }
     } catch (e) {
       // error reading value
       console.log('读取失败' + e);
@@ -237,8 +250,17 @@ class AppMain extends React.Component {
     wk = parseInt(wk);
     wa = parseInt(wa);
     cn = parseInt(cn);
+    let fdata;
     // console.log('执行了QueryTable' + tableData[wk]);
-    let fdata = JSON.parse(tableData[wk]);
+    try {
+      // console.log('执行了QueryTable' + tableData[wk]);
+      fdata = JSON.parse(tableData[wk]);
+    } catch (e) {
+      console.log('解析失败' + e);
+      showToast_mists(tableData[wk]);
+      return;
+    }
+
     let flag = true;
     let classInfo = [];
 
@@ -538,12 +560,7 @@ class AppMain extends React.Component {
       return classInfo;
     }
   };
-  // _showLoading() {
-  //   //EasyLoading.show();//显示
-  //   //EasyLoading.dimiss();//关闭
-  //   //自定义文本和超时时间
-  //   EasyLoading.show('加载中...', 2000);
-  // }
+
   render() {
     const Tab = createMaterialTopTabNavigator();
     const CS = [
@@ -599,22 +616,6 @@ class AppMain extends React.Component {
       );
     };
 
-    const PreviewLayout = ({children, values}) => (
-      <View style={{padding: 10, height: 50, backgroundColor: '#4099FF'}}>
-        <View style={styles.row}>
-          {/* <TouchableOpacity style={[styles.button]}>
-            <Icon name="calendar" type="evilicon" color="white" />
-          </TouchableOpacity> */}
-          <TouchableOpacity style={[styles.button]} onPress={this.UpdateAll}>
-            <Icon name="arrow-down" type="evilicon" color="white" />
-          </TouchableOpacity>
-          {/* <TouchableOpacity style={[styles.button]}>
-            <Icon name="gear" type="evilicon" color="white" />
-          </TouchableOpacity> */}
-        </View>
-        <View style={[styles.container]}>{children}</View>
-      </View>
-    );
     let isloading = this.state.isloading;
 
     // 主课表区域组件
@@ -946,16 +947,32 @@ function Crawl() {
     id +
     '&pwd=' +
     pwd;
+  // Http.setRequestHeader('Content-Type', 'application/json');
   Http.open('POST', loginLink);
   Http.send();
   let rep;
-
+  console.log('开始' + id);
   Http.onreadystatechange = function () {
-    // console.log(this.responseText);
-    rep = this.responseText;
+    console.log('@' + this.response);
+    rep = String(this.response);
+    rep = rep + '';
     // console.log(rep);
-    let res = JSON.parse(this.responseText);
-    tken = res.token;
+    // 正则表达式获取rep字符串中token后面的值
+    let reg = /"token":"(.*?)"/;
+    let r = rep.match(reg);
+    // let ro = rep.match(reg)[1];
+    r = r + '';
+    // 获取r中第10个到第138个字符
+
+    let token = r.substring(9, 138);
+
+    console.log('+++' + r);
+    tken = token;
+    if (token === '-1",-1') {
+      showToast_Warn();
+      return;
+    }
+    console.log('token:' + tken);
     let HttpRequest = [];
     // 循环获取整个学期的课表
     for (let i = 0; i < weekNum; i++) {
@@ -988,6 +1005,8 @@ const storeData = async (id_data, value) => {
     // console.log('存储数据');
     jsonValue = JSON.stringify(value);
     await AsyncStorage.setItem(id_data, jsonValue);
+    idok = 'store_success';
+    await AsyncStorage.setItem(idok, 'store_success');
   } catch (e) {
     console.log('存储失败' + e);
   }
@@ -1054,11 +1073,38 @@ const showToast_Share = () => {
   });
 };
 
+const showToast_Warn = () => {
+  Toast.show({
+    type: 'error',
+    text1: '网络错误或密码错误',
+    text2: '请检查网络权限或账号密码是否正确',
+    visibilityTime: 4000,
+  });
+};
+
+const showToast_mists = a => {
+  Toast.show({
+    type: 'error',
+    text1: '失败!',
+    text2: a,
+    visibilityTime: 8000,
+  });
+};
+
 const showToast_False = () => {
   Toast.show({
     type: 'error',
     text1: '分享失败',
     text2: '都点开了，还不分享？🤔🤔',
+    visibilityTime: 4000,
+  });
+};
+
+const showToast_clip = () => {
+  Toast.show({
+    type: 'info',
+    text1: '复制成功',
+    text2: '已复制到剪切板，请到浏览器打开',
     visibilityTime: 4000,
   });
 };
@@ -1153,7 +1199,7 @@ const styles = StyleSheet.create({
     padding: 5,
     borderRadius: 11,
     backgroundColor: 'rgba(78, 116, 289, 1)',
-    borderColor: 'rgba(78, 101, 255, 1)',
+    borderColor: 'rgba(43, 101, 255, 1)',
     borderWidth: 2,
     display: 'flex',
     justifyContent: 'center',
@@ -1205,20 +1251,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     height: 100,
   },
-  // button: {
-  //   paddingHorizontal: 8,
-  //   paddingVertical: 6,
-  //   borderRadius: 4,
-  //   // backgroundColor: '#2A82E4',
-  //   alignSelf: 'center',
-  //   marginHorizontal: '1%',
-  //   marginBottom: 1,
-  //   minWidth: '100%',
-  //   textAlign: 'center',
-  //   alignItems: 'center',
-  //   justifyContent: 'center',
-  //   color: 'white',
-  // },
   selected: {
     backgroundColor: 'coral',
     borderWidth: 0,
@@ -1267,6 +1299,45 @@ function SettingsScreen() {
     try {
       showToast_1();
       let dataid = 'begindate';
+      id = studentid;
+      pwd = password;
+      semester = sesmeter;
+      weekNum = weeknum;
+      firstWeek = begindate;
+      // 检查账号是否正确
+      const Http = new XMLHttpRequest();
+      let loginLink =
+        'http://newjwxt.bjfu.edu.cn/app.do?method=authUser&xh=' +
+        id +
+        '&pwd=' +
+        pwd;
+      // Http.setRequestHeader('Content-Type', 'application/json');
+      Http.open('POST', loginLink);
+      Http.send();
+      let rep;
+      console.log('开始' + id);
+      Http.onreadystatechange = function () {
+        console.log('@' + this.response);
+        rep = String(this.response);
+        rep = rep + '';
+        // console.log(rep);
+        // 正则表达式获取rep字符串中token后面的值
+        let reg = /"token":"(.*?)"/;
+        let r = rep.match(reg);
+        // let ro = rep.match(reg)[1];
+        r = r + '';
+        // 获取r中第10个到第138个字符
+
+        let token = r.substring(9, 138);
+
+        console.log('+++' + r);
+        tken = token;
+        if (token === '-1",-1') {
+          showToast_Warn();
+          return;
+        }
+        console.log('token:' + tken);
+      };
       await AsyncStorage.setItem(dataid, begindate);
       dataid = 'weeknum';
       await AsyncStorage.setItem(dataid, weeknum);
@@ -1328,7 +1399,7 @@ function SettingsScreen() {
               fontSize: 12,
               width: '90%',
             }}>
-            *所有数据都存储在您手机本地，不会上传到网络，也不会泄露给第三方，开发者也无从知晓，请放心使用，使用本APP即代表你授权林棵使用以上信息，林棵只在查课时使用教务系统API时调用这些数据，没有其他任何接口。填写完成后请点击保存按钮，并点击刷新课表。
+            *所有数据都存储在您手机本地，不会上传到网络，也不会泄露给第三方，开发者也无从知晓，请放心使用，使用本APP即代表你授权林棵使用以上信息，林棵只在查课时使用教务系统API时调用这些数据，没有其他任何接口。填写完成后请点击保存按钮，并点击刷新课表。关闭后台重启应用后，课表会更新。
           </Text>
           <Input
             placeholder="学期开始日期，格式：2022-08-27"
@@ -1444,6 +1515,7 @@ function SettingsScreen() {
               }}
               onPress={() => {
                 // AppMain.forceUpdate();
+                showToast_clip();
                 Clipboard.setString('https://github.com/inannan423/LindaTool');
               }}>
               <Icon name="sc-github" type="evilicon" color="white" />
@@ -1459,12 +1531,22 @@ function SettingsScreen() {
             }}>
             *本软件仅供开源学习使用，任何恶意使用与本人无关。源代码已开源，欢迎大家star和贡献。
           </Text>
+          <Image
+            style={{
+              marginTop: 20,
+              width: 15,
+              height: 15,
+            }}
+            source={{
+              uri: 'https://reactnative.dev/img/tiny_logo.png',
+            }}
+          />
           <Text
             style={{
               fontSize: 12,
               width: '90%',
-              marginTop: 20,
 
+              fontWeight: 'bold',
               textAlign: 'center',
               color: 'black',
             }}>
@@ -1477,12 +1559,12 @@ function SettingsScreen() {
               textAlign: 'center',
               color: 'black',
               marginBottom: 20,
+              fontWeight: 'bold',
             }}>
             Powered by React Native
           </Text>
         </ScrollView>
       </SafeAreaView>
-      {/* <Toast /> */}
     </>
   );
 }
